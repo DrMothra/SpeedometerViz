@@ -24,6 +24,10 @@ wss.on('connection', function connection(ws, req) {
     ws.on('message', function incoming(message) {
         console.log('received: %s', message);
     });
+
+    ws.on("error", error => {
+        console.log("Client refresh");
+    })
 });
 
 server.listen(3000, function listening() {

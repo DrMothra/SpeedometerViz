@@ -1,5 +1,12 @@
 //Speedometer visualisation
 
+const NEEDLE_WIDTH = 120;
+const NEEDLE_HEIGHT = 5;
+const NEEDLE_DEPTH = 30;
+const NEEDLE_SEGMENTS = 8;
+const MAX_SPEED = 80;
+const NEEDLE_SCALE = 50;
+
 class SpeedoApp extends BaseApp {
     constructor() {
         super();
@@ -38,18 +45,37 @@ class SpeedoApp extends BaseApp {
         this.addGround();
 
         //Add block
-        let geom = new THREE.BoxBufferGeometry(30, 1, 30, 8, 8);
+        /*
+        let geom = new THREE.BoxBufferGeometry(NEEDLE_WIDTH, NEEDLE_HEIGHT, NEEDLE_DEPTH, NEEDLE_SEGMENTS, NEEDLE_SEGMENTS);
         let mat = new THREE.MeshLambertMaterial( {color: 0x0000ff} );
         let speedMesh = new THREE.Mesh(geom, mat);
         this.addToScene(speedMesh);
         this.speedMesh = speedMesh;
+        */
+
+        //Load model
+        let mtlLoader = new THREE.MTLLoader();
+        mtlLoader.setPath("./models/");
+        mtlLoader.load("speedometerNeedle.mtl", materials => {
+            materials.preload();
+
+            let objLoader = new THREE.OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.setPath("./models/");
+            objLoader.load("speedometerNeedle.obj", object => {
+                object.scale.set(NEEDLE_SCALE, NEEDLE_SCALE, NEEDLE_SCALE);
+                object.position.y = 50;
+                this.speedMesh = object;
+                this.addToScene(object);
+            })
+        });
     }
 
     update() {
         super.update();
 
         if(this.dataAvailable) {
-            this.speedMesh.scale.y = this.currentSpeed * 2;
+            this.speedMesh.rotation.z = (this.currentSpeed / MAX_SPEED) * Math.PI;
             this.dataAvailable = false;
         }
 
