@@ -126,7 +126,6 @@ class BaseApp {
         this.camera.updateProjectionMatrix();
 
         this.renderer.setSize( window.innerWidth, window.innerHeight);
-        this.fitToScreen();
     }
 
     createScene() {
@@ -198,11 +197,11 @@ class BaseApp {
         this.controls.staticMoving = true;
         this.controls.dynamicDampingFactor = 0.3;
 
-        this.controls.disableMovement();
+        //this.controls.disableMovement();
 
         this.controls.keys = [ 65, 83, 68 ];
 
-        const LOOK_X = -250, LOOK_Y = 15, LOOK_Z = 0;
+        const LOOK_X = 0, LOOK_Y = 0, LOOK_Z = 0;
         let lookAt = new THREE.Vector3(LOOK_X, LOOK_Y, LOOK_Z);
         this.controls.setLookAt(lookAt);
     }
@@ -219,11 +218,6 @@ class BaseApp {
     }
 
     run() {
-        this.raycaster.setFromCamera( this.mouse, this.camera );
-        this.hoverObjects = this.raycaster.intersectObjects(this.parentGroupDaily.children);
-        if(!this.hoverObjects.length) {
-            this.hoverObjects = this.raycaster.intersectObjects(this.parentGroupWeekly.children);
-        }
         this.update();
         this.renderer.render( this.scenes[this.currentScene], this.camera );
         if(this.stats) this.stats.update();
