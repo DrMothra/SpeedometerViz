@@ -1,11 +1,12 @@
 //Speedometer visualisation
 
-const NEEDLE_WIDTH = 120;
-const NEEDLE_HEIGHT = 5;
-const NEEDLE_DEPTH = 30;
-const NEEDLE_SEGMENTS = 8;
-const MAX_SPEED = 80;
+const MAX_SPEED = 90;
+const MAX_REVS = 6500;
 const NEEDLE_SCALE = 50;
+const MIN_REVS = 700;
+const GAUGE_HEIGHT = 50;
+const REV_POS_X = -60;
+const SPEEDO_POS_X = 60;
 
 class SpeedoApp extends BaseApp {
     constructor() {
@@ -21,15 +22,21 @@ class SpeedoApp extends BaseApp {
         let host = window.document.location.host.replace(/:.*/, '');
         let ws = new WebSocket('ws://' + host + ':3000');
         this.dataAvailable = false;
-        this.currentSpeed = 1;
+        this.currentSpeed = 0;
+        this.currentRevs = 0;
+        this.modelLoaded = false;
 
         ws.onmessage = event => {
-            //console.log("Speed = ", event.data);
-            this.currentSpeed = event.data;
-            if(this.currentSpeed < 1) {
-                this.currentSpeed = 1;
+            //console.log("Data = ", event.data);
+            if(event.data > MIN_REVS) {
+                this.currentRevs = event.data;
+            } else {
+                this.currentSpeed = event.data;
             }
-            this.dataAvailable = true;
+
+            if(this.modelLoaded) {
+                this.dataAvailable = true;
+            }
         };
     }
 
@@ -44,29 +51,64 @@ class SpeedoApp extends BaseApp {
         //Add ground plane
         this.addGround();
 
-        //Add block
-        /*
-        let geom = new THREE.BoxBufferGeometry(NEEDLE_WIDTH, NEEDLE_HEIGHT, NEEDLE_DEPTH, NEEDLE_SEGMENTS, NEEDLE_SEGMENTS);
-        let mat = new THREE.MeshLambertMaterial( {color: 0x0000ff} );
-        let speedMesh = new THREE.Mesh(geom, mat);
-        this.addToScene(speedMesh);
-        this.speedMesh = speedMesh;
-        */
-
         //Load model
+        let revGroup = new THREE.Object3D();
+        revGroup.scale.set(NEEDLE_SCALE, NEEDLE_SCALE, NEEDLE_SCALE);
+        revGroup.position.y = GAUGE_HEIGHT;
+        revGroup.position.x = REV_POS_X;
+        this.root.add(revGroup);
+
+        let speedoGroup = new THREE.Object3D();
+        speedoGroup.scale.set(NEEDLE_SCALE, NEEDLE_SCALE, NEEDLE_SCALE);
+        speedoGroup.position.y = GAUGE_HEIGHT;
+        speedoGroup.position.x = SPEEDO_POS_X;
+        this.root.add(speedoGroup);
+
         let mtlLoader = new THREE.MTLLoader();
         mtlLoader.setPath("./models/");
-        mtlLoader.load("speedometerNeedle.mtl", materials => {
+        mtlLoader.load("dashBoard.mtl", materials => {
             materials.preload();
 
             let objLoader = new THREE.OBJLoader();
+            let currentObject;
+            let revGroupObjects = [], speedoObjects = [];
             objLoader.setMaterials(materials);
             objLoader.setPath("./models/");
-            objLoader.load("speedometerNeedle.obj", object => {
-                object.scale.set(NEEDLE_SCALE, NEEDLE_SCALE, NEEDLE_SCALE);
-                object.position.y = 50;
-                this.speedMesh = object;
-                this.addToScene(object);
+            objLoader.load("dashBoard.obj", object => {
+                for(let i=0, numChildren=object.children.length; i<numChildren; ++i) {
+                    currentObject = object.children[i];
+                    if(currentObject.name.indexOf("RevCounter") !== -1) {
+                        console.log("Found rev counter child");
+                        revGroupObjects.push(object.children[i]);
+                        if(currentObject.name.indexOf("RevCounterHand") !== -1) {
+                            console.log("Found rev counter needle");
+                            this.revCounter = object.children[i];
+                        }
+                    }
+                    if(currentObject.name.indexOf("Speedometer") !== -1) {
+                        console.log("Found speedometer child");
+                        speedoObjects.push(object.children[i]);
+                        if(currentObject.name.indexOf("SpeedometerHand") !== -1) {
+                            console.log("Found speedo needle");
+                            this.speedometer = object.children[i];
+                        }
+                    }
+                }
+                if(this.revCounter === undefined) {
+                    console.log("Rev counter not in model");
+                    return;
+                }
+                if(this.speedometer === undefined) {
+                    console.log("Speedometer needle not in model");
+                    return;
+                }
+                for(let i=0, numChildren=revGroupObjects.length; i<numChildren; ++i) {
+                    revGroup.add(revGroupObjects[i]);
+                }
+                for(let i=0, numChildren=speedoObjects.length; i<numChildren; ++i) {
+                    speedoGroup.add(speedoObjects[i]);
+                }
+                this.modelLoaded = true;
             })
         });
     }
@@ -75,7 +117,8 @@ class SpeedoApp extends BaseApp {
         super.update();
 
         if(this.dataAvailable) {
-            this.speedMesh.rotation.z = (this.currentSpeed / MAX_SPEED) * Math.PI;
+            this.speedometer.rotation.z = -(this.currentSpeed / MAX_SPEED) * Math.PI;
+            this.revCounter.rotation.z = -(this.currentRevs / MAX_REVS) * Math.PI;
             this.dataAvailable = false;
         }
 

@@ -26,8 +26,12 @@ wss.on('connection', function connection(ws, req) {
     });
 
     ws.on("error", error => {
-        console.log("Client refresh");
-    })
+        console.log("Client error = ", error);
+    });
+
+    ws.on("close", () => {
+        console.log("Client closed connection");
+    });
 });
 
 server.listen(3000, function listening() {
@@ -36,7 +40,7 @@ server.listen(3000, function listening() {
 
 let dgram = require('dgram');
 let udpServer = dgram.createSocket('udp4');
-let speed;
+let speed, revs;
 
 udpServer.on('listening', function () {
     let address = udpServer.address();
@@ -44,11 +48,18 @@ udpServer.on('listening', function () {
 });
 
 udpServer.on('message', function (message, remote) {
-    speed = message[0];
     //DEBUG
-    //console.log("Speed = ", speed);
+    //console.log("SpeedInt = ", message[0]);
+    //console.log("SpeedDec = ", message[1]);
+    speed = message[0] + (message[1]/100);
+    //console.log("Revs = ", message[2] + " " + message[3]);
+    revs = (message[3] << 8) + message[2];
+    console.log("Revs = ", revs);
     if(clientWS) {
-        clientWS.send(speed);
+        if(clientWS.readyState === WebSocket.OPEN) {
+            clientWS.send(speed !== undefined ? speed : 0);
+            clientWS.send(revs !== undefined ? revs : 0);
+        }
     }
 });
 
