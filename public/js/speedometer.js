@@ -2,11 +2,11 @@
 
 const MAX_SPEED = 90;
 const MAX_REVS = 6500;
-const NEEDLE_SCALE = 50;
+const DASHBOARD_SCALE = 50;
 const MIN_REVS = 700;
 const GAUGE_HEIGHT = 50;
-const REV_POS_X = -60;
-const SPEEDO_POS_X = 60;
+const REV_POS_X = 90;
+const SPEEDO_POS_X = 0;
 
 class SpeedoApp extends BaseApp {
     constructor() {
@@ -25,6 +25,8 @@ class SpeedoApp extends BaseApp {
         this.currentSpeed = 0;
         this.currentRevs = 0;
         this.modelLoaded = false;
+        this.maxSpeed = MAX_SPEED;
+        this.maxRevs = MAX_REVS;
 
         ws.onmessage = event => {
             //console.log("Data = ", event.data);
@@ -40,7 +42,7 @@ class SpeedoApp extends BaseApp {
         };
     }
 
-    createScene() {
+    createScene(sceneConfig) {
         //Init base createsScene
         super.createScene();
 
@@ -51,49 +53,63 @@ class SpeedoApp extends BaseApp {
         //Add ground plane
         this.addGround();
 
+        //Config stuff
+        this.maxSpeed = sceneConfig.MAX_SPEED;
+        this.maxRevs = sceneConfig.MAX_REVS;
+
         //Load model
         let revGroup = new THREE.Object3D();
-        revGroup.scale.set(NEEDLE_SCALE, NEEDLE_SCALE, NEEDLE_SCALE);
+        revGroup.scale.set(DASHBOARD_SCALE, DASHBOARD_SCALE, DASHBOARD_SCALE);
         revGroup.position.y = GAUGE_HEIGHT;
-        revGroup.position.x = REV_POS_X;
+        revGroup.position.x = sceneConfig.REV_POS_X;
         this.root.add(revGroup);
 
         let speedoGroup = new THREE.Object3D();
-        speedoGroup.scale.set(NEEDLE_SCALE, NEEDLE_SCALE, NEEDLE_SCALE);
+        speedoGroup.scale.set(DASHBOARD_SCALE, DASHBOARD_SCALE, DASHBOARD_SCALE);
         speedoGroup.position.y = GAUGE_HEIGHT;
-        speedoGroup.position.x = SPEEDO_POS_X;
+        speedoGroup.position.x = sceneConfig.SPEEDO_POS_X;
         this.root.add(speedoGroup);
+
+        let otherGroup = new THREE.Object3D();
+        otherGroup.scale.set(DASHBOARD_SCALE, DASHBOARD_SCALE, DASHBOARD_SCALE);
+        otherGroup.position.y = GAUGE_HEIGHT;
+        this.root.add(otherGroup);
 
         let mtlLoader = new THREE.MTLLoader();
         mtlLoader.setPath("./models/");
-        mtlLoader.load("dashBoard.mtl", materials => {
+        let baseFilename = sceneConfig.fileName;
+        let materialFile = baseFilename + ".mtl";
+        let objectFile = baseFilename + ".obj";
+        mtlLoader.load(materialFile, materials => {
             materials.preload();
 
             let objLoader = new THREE.OBJLoader();
-            let currentObject;
-            let revGroupObjects = [], speedoObjects = [];
+            let currentObjectName;
+            let revGroupObjects = [], speedoObjects = [], otherObjects = [];
             objLoader.setMaterials(materials);
             objLoader.setPath("./models/");
-            objLoader.load("dashBoard.obj", object => {
+            objLoader.load(objectFile, object => {
                 for(let i=0, numChildren=object.children.length; i<numChildren; ++i) {
-                    currentObject = object.children[i];
-                    if(currentObject.name.indexOf("RevCounter") !== -1) {
+                    currentObjectName = object.children[i].name;
+                    if(currentObjectName.indexOf("RevCounter") !== -1) {
                         console.log("Found rev counter child");
                         revGroupObjects.push(object.children[i]);
-                        if(currentObject.name.indexOf("RevCounterHand") !== -1) {
+                        if(currentObjectName.indexOf("RevCounterHand") !== -1) {
                             console.log("Found rev counter needle");
                             this.revCounter = object.children[i];
                         }
-                    }
-                    if(currentObject.name.indexOf("Speedometer") !== -1) {
+                    } else if(currentObjectName.indexOf("Speedometer") !== -1) {
                         console.log("Found speedometer child");
                         speedoObjects.push(object.children[i]);
-                        if(currentObject.name.indexOf("SpeedometerHand") !== -1) {
+                        if(currentObjectName.indexOf("SpeedometerHand") !== -1) {
                             console.log("Found speedo needle");
                             this.speedometer = object.children[i];
                         }
+                    } else {
+                        otherObjects.push(object.children[i]);
                     }
                 }
+
                 if(this.revCounter === undefined) {
                     console.log("Rev counter not in model");
                     return;
@@ -108,6 +124,9 @@ class SpeedoApp extends BaseApp {
                 for(let i=0, numChildren=speedoObjects.length; i<numChildren; ++i) {
                     speedoGroup.add(speedoObjects[i]);
                 }
+                for(let i=0, numChildren=otherObjects.length; i<numChildren; ++i) {
+                    otherGroup.add(otherObjects[i]);
+                }
                 this.modelLoaded = true;
             })
         });
@@ -117,8 +136,8 @@ class SpeedoApp extends BaseApp {
         super.update();
 
         if(this.dataAvailable) {
-            this.speedometer.rotation.z = -(this.currentSpeed / MAX_SPEED) * Math.PI;
-            this.revCounter.rotation.z = -(this.currentRevs / MAX_REVS) * Math.PI;
+            this.speedometer.rotation.z = -(this.currentSpeed / this.maxSpeed) * Math.PI;
+            this.revCounter.rotation.z = -(this.currentRevs / this.maxRevs) * Math.PI;
             this.dataAvailable = false;
         }
 
@@ -143,11 +162,46 @@ $(document).ready( () => {
         return;
     }
 
+    //app.createGUI();
+
+    //GUI callbacks
+    $('#option1').on("click", () => {
+        $('#configuration').addClass("d-none");
+        $('#WebGL-output').removeClass("d-none");
+
+        //Jaguar configuration
+        let sceneConfig = {
+            fileName: "jaguarDash",
+            REV_POS_X: 90,
+            SPEEDO_POS_X: 0,
+            MAX_SPEED: 90,
+            MAX_REVS: 6500
+        };
+
+        runApp(sceneConfig);
+    });
+
+    $("#option2").on("click", () => {
+        $('#configuration').addClass("d-none");
+        $('#WebGL-output').removeClass("d-none");
+
+        //Blue neon configuration
+        let sceneConfig = {
+            fileName: "dashBoard",
+            REV_POS_X: -60,
+            SPEEDO_POS_X: 60,
+            MAX_SPEED: 90,
+            MAX_REVS: 6500
+        };
+
+        runApp(sceneConfig);
+    });
+});
+
+function runApp(config) {
     let container = document.getElementById("WebGL-output");
     let app = new SpeedoApp();
     app.init(container);
-    //app.createGUI();
-    app.createScene();
-
+    app.createScene(config);
     app.run();
-});
+}
