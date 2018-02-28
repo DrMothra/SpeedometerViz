@@ -196,6 +196,22 @@ $(document).ready( () => {
 
         runApp(sceneConfig);
     });
+
+    $("#option3").on("click", () => {
+        $('#configuration').addClass("d-none");
+        $('#WebGL-output').removeClass("d-none");
+
+        //land Rover configuration
+        let sceneConfig = {
+            fileName: "landRoverDash",
+            REV_POS_X: -60,
+            SPEEDO_POS_X: 60,
+            MAX_SPEED: 90,
+            MAX_REVS: 6500
+        };
+
+        runApp(sceneConfig);
+    });
 });
 
 function runApp(config) {
