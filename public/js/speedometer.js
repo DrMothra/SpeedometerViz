@@ -118,11 +118,11 @@ class SpeedoApp extends BaseApp {
                     }
                 }
 
-                if(this.revCounter === undefined) {
+                if(this.revCounter === undefined && !sceneConfig.digital) {
                     console.log("Rev counter not in model");
                     return;
                 }
-                if(this.speedometer === undefined) {
+                if(this.speedometer === undefined && !sceneConfig.digital) {
                     console.log("Speedometer needle not in model");
                     return;
                 }
@@ -135,6 +135,7 @@ class SpeedoApp extends BaseApp {
                 for(let i=0, numChildren=otherObjects.length; i<numChildren; ++i) {
                     otherGroup.add(otherObjects[i]);
                 }
+                this.digital = sceneConfig.digital;
                 this.modelLoaded = true;
             })
         });
@@ -144,8 +145,12 @@ class SpeedoApp extends BaseApp {
         super.update();
 
         if(this.dataAvailable) {
-            this.speedometer.rotation.z = -(this.currentSpeed / this.maxSpeed) * Math.PI;
-            this.revCounter.rotation.z = -(this.currentRevs / this.maxRevs) * Math.PI;
+            if(!this.digital) {
+                this.speedometer.rotation.z = -(this.currentSpeed / this.maxSpeed) * Math.PI;
+                this.revCounter.rotation.z = -(this.currentRevs / this.maxRevs) * Math.PI;
+            } else {
+                $('#speedOut').html(this.currentSpeed);
+            }
             this.dataAvailable = false;
         }
 
@@ -184,6 +189,7 @@ $(document).ready( () => {
             SPEEDO_POS_X: 0,
             MAX_SPEED: 90,
             MAX_REVS: 6500,
+            digital: false,
             speedoOffset: undefined,
             revCounterOffset: undefined
         };
@@ -202,6 +208,7 @@ $(document).ready( () => {
             SPEEDO_POS_X: 60,
             MAX_SPEED: 90,
             MAX_REVS: 6500,
+            digitial: false,
             speedoOffset: undefined,
             revCounterOffset: undefined
         };
@@ -220,8 +227,28 @@ $(document).ready( () => {
             SPEEDO_POS_X: 60,
             MAX_SPEED: 90,
             MAX_REVS: 5000,
+            digital: false,
             speedoOffset: [0.15, 0.025],
             revCounterOffset: [-0.15, -0.075]
+        };
+
+        runApp(sceneConfig);
+    });
+
+    $("#option4").on("click", () => {
+        $('#configuration').addClass("d-none");
+        $('#WebGL-output').removeClass("d-none");
+
+        //Digital configuration
+        let sceneConfig = {
+            fileName: "digitalDash",
+            REV_POS_X: -60,
+            SPEEDO_POS_X: 60,
+            MAX_SPEED: 90,
+            MAX_REVS: 5000,
+            digital: true,
+            speedoOffset: undefined,
+            revCounterOffset: undefined
         };
 
         runApp(sceneConfig);

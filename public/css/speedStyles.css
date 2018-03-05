@@ -2,3 +2,25 @@ body {
     margin: 0;
     overflow: hidden;
 }
+#WebGL-output {
+    position: relative;
+}
+/* Fonts */
+@font-face {
+    font-family: 'lcd2bold';
+    src: url('../fonts/lcd.woff2') format('woff2'),
+    url('../fonts/lcd.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+.output {
+    position: absolute;
+    font-family: lcd2bold;
+    color: blue;
+    font-size: 2rem;
+}
+#speedOutContainer {
+    left: 70%;
+    width: 10%;
+    top: 45%;
+}
