@@ -97,6 +97,10 @@ class SpeedoApp extends BaseApp {
                         if(currentObjectName.indexOf("RevCounterHand") !== -1) {
                             console.log("Found rev counter needle");
                             this.revCounter = object.children[i];
+                            if(sceneConfig.revCounterOffset) {
+                                this.revCounter.position.set(sceneConfig.revCounterOffset[0], sceneConfig.revCounterOffset[1], 0);
+                            }
+
                         }
                     } else if(currentObjectName.indexOf("Speedometer") !== -1) {
                         console.log("Found speedometer child");
@@ -104,6 +108,10 @@ class SpeedoApp extends BaseApp {
                         if(currentObjectName.indexOf("SpeedometerHand") !== -1) {
                             console.log("Found speedo needle");
                             this.speedometer = object.children[i];
+                            if(sceneConfig.speedoOffset) {
+                                this.speedometer.position.set(sceneConfig.speedoOffset[0], sceneConfig.speedoOffset[1], 0);
+                            }
+
                         }
                     } else {
                         otherObjects.push(object.children[i]);
@@ -175,7 +183,9 @@ $(document).ready( () => {
             REV_POS_X: 90,
             SPEEDO_POS_X: 0,
             MAX_SPEED: 90,
-            MAX_REVS: 6500
+            MAX_REVS: 6500,
+            speedoOffset: undefined,
+            revCounterOffset: undefined
         };
 
         runApp(sceneConfig);
@@ -191,7 +201,9 @@ $(document).ready( () => {
             REV_POS_X: -60,
             SPEEDO_POS_X: 60,
             MAX_SPEED: 90,
-            MAX_REVS: 6500
+            MAX_REVS: 6500,
+            speedoOffset: undefined,
+            revCounterOffset: undefined
         };
 
         runApp(sceneConfig);
@@ -207,7 +219,9 @@ $(document).ready( () => {
             REV_POS_X: -60,
             SPEEDO_POS_X: 60,
             MAX_SPEED: 90,
-            MAX_REVS: 6500
+            MAX_REVS: 5000,
+            speedoOffset: [0.15, 0.025],
+            revCounterOffset: [-0.15, -0.075]
         };
 
         runApp(sceneConfig);
