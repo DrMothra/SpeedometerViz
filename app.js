@@ -49,12 +49,10 @@ udpServer.on('listening', function () {
 
 udpServer.on('message', function (message, remote) {
     //DEBUG
-    //console.log("SpeedInt = ", message[0]);
-    //console.log("SpeedDec = ", message[1]);
     speed = message[0] + (message[1]/100);
-    //console.log("Revs = ", message[2] + " " + message[3]);
     revs = (message[3] << 8) + message[2];
-    console.log("Revs = ", revs);
+    //console.log("Revs = ", revs);
+    //console.log("Speed = ", speed);
     if(clientWS) {
         if(clientWS.readyState === WebSocket.OPEN) {
             clientWS.send(speed !== undefined ? speed : 0);

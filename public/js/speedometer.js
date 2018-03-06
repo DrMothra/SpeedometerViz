@@ -161,10 +161,11 @@ class SpeedoApp extends BaseApp {
         //Ground plane
         const GROUND_WIDTH = 1000, GROUND_HEIGHT = 640, SEGMENTS = 16;
         let groundGeom = new THREE.PlaneBufferGeometry(GROUND_WIDTH, GROUND_HEIGHT, SEGMENTS, SEGMENTS);
-        let groundMat = new THREE.MeshLambertMaterial( {color: 0xcdcdcd} );
+        let groundMat = new THREE.MeshLambertMaterial( {color: 0x000000} );
         let ground = new THREE.Mesh(groundGeom, groundMat);
         ground.name = "Ground";
-        ground.rotation.x = -Math.PI/2;
+        //ground.rotation.x = -Math.PI/2;
+        ground.position.z = -15.0;
         this.root.add(ground);
     }
 }
@@ -188,8 +189,8 @@ $(document).ready( () => {
             fileName: "jaguarDash",
             REV_POS_X: 90,
             SPEEDO_POS_X: 0,
-            MAX_SPEED: 90,
-            MAX_REVS: 6500,
+            MAX_SPEED: 140,
+            MAX_REVS: 4100,
             digital: false,
             speedoOffset: undefined,
             revCounterOffset: undefined
@@ -207,7 +208,7 @@ $(document).ready( () => {
             fileName: "dashBoard",
             REV_POS_X: -60,
             SPEEDO_POS_X: 60,
-            MAX_SPEED: 90,
+            MAX_SPEED: 85,
             MAX_REVS: 6500,
             digitial: false,
             speedoOffset: undefined,
@@ -226,8 +227,8 @@ $(document).ready( () => {
             fileName: "landRoverDash",
             REV_POS_X: -60,
             SPEEDO_POS_X: 60,
-            MAX_SPEED: 90,
-            MAX_REVS: 5000,
+            MAX_SPEED: 100,
+            MAX_REVS: 4000,
             digital: false,
             speedoOffset: [0.15, 0.025],
             revCounterOffset: [-0.15, -0.075]
@@ -248,6 +249,25 @@ $(document).ready( () => {
             MAX_SPEED: 90,
             MAX_REVS: 5000,
             digital: true,
+            speedoOffset: undefined,
+            revCounterOffset: undefined
+        };
+
+        runApp(sceneConfig);
+    });
+
+    $("#option5").on("click", () => {
+        $('#configuration').addClass("d-none");
+        $('#WebGL-output').removeClass("d-none");
+
+        //Audi configuration
+        let sceneConfig = {
+            fileName: "audiDash",
+            REV_POS_X: -60,
+            SPEEDO_POS_X: 60,
+            MAX_SPEED: 105,
+            MAX_REVS: 5000,
+            digital: false,
             speedoOffset: undefined,
             revCounterOffset: undefined
         };
