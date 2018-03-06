@@ -149,7 +149,8 @@ class SpeedoApp extends BaseApp {
                 this.speedometer.rotation.z = -(this.currentSpeed / this.maxSpeed) * Math.PI;
                 this.revCounter.rotation.z = -(this.currentRevs / this.maxRevs) * Math.PI;
             } else {
-                $('#speedOut').html(this.currentSpeed);
+                $('#speedOut').html(Math.round(this.currentSpeed));
+                $('#revs').html(this.currentRevs);
             }
             this.dataAvailable = false;
         }

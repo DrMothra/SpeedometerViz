@@ -17,10 +17,15 @@ body {
     position: absolute;
     font-family: lcd2bold;
     color: blue;
-    font-size: 2rem;
+    font-size: 6rem;
 }
 #speedOutContainer {
-    left: 70%;
+    left: 65%;
     width: 10%;
-    top: 45%;
+    top: 32.5%;
+}
+#revsContainer {
+    left: 27.5%;
+    width: 10%;
+    top: 32.5%;
 }
