@@ -206,8 +206,8 @@ $(document).ready( () => {
         //Blue neon configuration
         let sceneConfig = {
             fileName: "dashBoard",
-            REV_POS_X: -60,
-            SPEEDO_POS_X: 60,
+            REV_POS_X: -80,
+            SPEEDO_POS_X: 80,
             MAX_SPEED: 85,
             MAX_REVS: 6500,
             digitial: false,
