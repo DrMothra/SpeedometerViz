@@ -41,28 +41,52 @@ server.listen(3000, function listening() {
     console.log('Listening on %d', server.address().port);
 });
 
-let dgram = require('dgram');
-let udpServer = dgram.createSocket('udp4');
-let speed, revs;
+//Read vehicle data from network - UDP
+let COMMS = process.env.DRIVING_COMMS || "UDP";
 
-udpServer.on('listening', function () {
-    let address = udpServer.address();
-    console.log('UDP Server listening on ' + address.address + ":" + address.port);
-});
-
-udpServer.on('message', function (message, remote) {
+if(COMMS === "UDP") {
     //DEBUG
-    speed = message[0] + (message[1]/100);
-    revs = (message[3] << 8) + message[2];
-    //console.log("Revs = ", revs);
-    //console.log("Speed = ", speed);
-    if(clientWS) {
-        if(clientWS.readyState === WebSocket.OPEN) {
-            clientWS.send(speed !== undefined ? speed : 0);
-            //Make revs negative to differentiate from speed
-            clientWS.send(revs !== undefined ? -revs : 0);
-        }
-    }
-});
+    console.log("Reading data via UDP");
 
-udpServer.bind(PORT, HOST);
+    let dgram = require('dgram');
+    let udpServer = dgram.createSocket('udp4');
+    let speed, revs;
+
+    udpServer.on('listening', function () {
+        let address = udpServer.address();
+        console.log('UDP Server listening on ' + address.address + ":" + address.port);
+    });
+
+    udpServer.on('message', function (message, remote) {
+        //DEBUG
+        speed = message[0] + (message[1]/100);
+        revs = (message[3] << 8) + message[2];
+        //console.log("Revs = ", revs);
+        //console.log("Speed = ", speed);
+        if(clientWS) {
+            if(clientWS.readyState === WebSocket.OPEN) {
+                clientWS.send(speed !== undefined ? speed : 0);
+                //Make revs negative to differentiate from speed
+                clientWS.send(revs !== undefined ? -revs : 0);
+            }
+        }
+    });
+
+    udpServer.bind(PORT, HOST);
+} else {
+    //Read data from serial port
+    //DEBUG
+    console.log("Reading data via serial port");
+
+    const SerialPort = require("serialport");
+    const port = new SerialPort("COM1");
+
+    port.on("open", () => {
+        console.log("Port opened");
+    });
+
+    port.on("data", data => {
+        //Got data from serial port
+        console.log(data.toString());
+    });
+}
