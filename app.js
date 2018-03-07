@@ -56,7 +56,7 @@ udpServer.on('message', function (message, remote) {
     if(clientWS) {
         if(clientWS.readyState === WebSocket.OPEN) {
             clientWS.send(speed !== undefined ? speed : 0);
-            clientWS.send(revs !== undefined ? revs : 0);
+            clientWS.send(revs !== undefined ? -revs : 0);
         }
     }
 });

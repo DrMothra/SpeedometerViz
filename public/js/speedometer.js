@@ -27,13 +27,18 @@ class SpeedoApp extends BaseApp {
         this.modelLoaded = false;
         this.maxSpeed = MAX_SPEED;
         this.maxRevs = MAX_REVS;
+        this.digital = false;
 
         ws.onmessage = event => {
             //console.log("Data = ", event.data);
-            if(event.data > MIN_REVS) {
-                this.currentRevs = event.data;
+            if(event.data < 0) {
+                this.currentRevs = -event.data;
+                //console.log("Revs = ", this.currentRevs);
             } else {
                 this.currentSpeed = event.data;
+                if(this.currentSpeed < 1) {
+                    this.currentRevs = 0;
+                }
             }
 
             if(this.modelLoaded) {
@@ -135,7 +140,14 @@ class SpeedoApp extends BaseApp {
                 for(let i=0, numChildren=otherObjects.length; i<numChildren; ++i) {
                     otherGroup.add(otherObjects[i]);
                 }
+                //Set visibility
+                revGroup.visible = sceneConfig.revCounterVisible;
+                speedoGroup.visible = sceneConfig.speedometerVisible;
                 this.digital = sceneConfig.digital;
+                //Set digital display if required
+                if(this.digital) {
+
+                }
                 this.modelLoaded = true;
             })
         });
@@ -192,6 +204,8 @@ $(document).ready( () => {
             MAX_SPEED: 140,
             MAX_REVS: 4100,
             digital: false,
+            speedometerVisible: true,
+            revCounterVisible: true,
             speedoOffset: undefined,
             revCounterOffset: undefined
         };
@@ -211,6 +225,8 @@ $(document).ready( () => {
             MAX_SPEED: 85,
             MAX_REVS: 6500,
             digitial: false,
+            speedometerVisible: true,
+            revCounterVisible: true,
             speedoOffset: undefined,
             revCounterOffset: undefined
         };
@@ -230,6 +246,8 @@ $(document).ready( () => {
             MAX_SPEED: 100,
             MAX_REVS: 4000,
             digital: false,
+            speedometerVisible: true,
+            revCounterVisible: true,
             speedoOffset: [0.15, 0.025],
             revCounterOffset: [-0.15, -0.075]
         };
@@ -249,6 +267,10 @@ $(document).ready( () => {
             MAX_SPEED: 90,
             MAX_REVS: 5000,
             digital: true,
+            speedometerVisible: true,
+            revCounterVisible: true,
+            speedometerLeft: 65,
+            revCounterLeft: 27.5,
             speedoOffset: undefined,
             revCounterOffset: undefined
         };
@@ -268,6 +290,8 @@ $(document).ready( () => {
             MAX_SPEED: 105,
             MAX_REVS: 5000,
             digital: false,
+            speedometerVisible: true,
+            revCounterVisible: true,
             speedoOffset: undefined,
             revCounterOffset: undefined
         };
@@ -278,6 +302,10 @@ $(document).ready( () => {
 
 function runApp(config) {
     let container = document.getElementById("WebGL-output");
+    //Go full screen
+    if(screenfull.enabled) {
+        screenfull.request();
+    }
     let app = new SpeedoApp();
     app.init(container);
     app.createScene(config);
