@@ -146,7 +146,8 @@ class SpeedoApp extends BaseApp {
                 this.digital = sceneConfig.digital;
                 //Set digital display if required
                 if(this.digital) {
-
+                    $('#speedOutContainer').css("left", sceneConfig.speedometerLeft + "%");
+                    $('#revsContainer').css("left", sceneConfig.revCounterLeft + "%");
                 }
                 this.modelLoaded = true;
             })

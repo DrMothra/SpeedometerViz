@@ -20,12 +20,10 @@ body {
     font-size: 6rem;
 }
 #speedOutContainer {
-    left: 65%;
     width: 10%;
     top: 32.5%;
 }
 #revsContainer {
-    left: 27.5%;
     width: 10%;
     top: 32.5%;
 }
