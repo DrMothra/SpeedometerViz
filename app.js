@@ -17,6 +17,9 @@ const wss = new WebSocket.Server({ server });
 let clientWS;
 
 wss.on('connection', function connection(ws, req) {
+    //DEBUG
+    console.log("Client opened connection");
+
     const location = url.parse(req.url, true);
     // You might use location.query.access_token to authenticate or share sessions
     // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
@@ -26,7 +29,7 @@ wss.on('connection', function connection(ws, req) {
     });
 
     ws.on("error", error => {
-        console.log("Client error = ", error);
+        console.log("Client error = ", error.errno);
     });
 
     ws.on("close", () => {
@@ -56,6 +59,7 @@ udpServer.on('message', function (message, remote) {
     if(clientWS) {
         if(clientWS.readyState === WebSocket.OPEN) {
             clientWS.send(speed !== undefined ? speed : 0);
+            //Make revs negative to differentiate from speed
             clientWS.send(revs !== undefined ? -revs : 0);
         }
     }
